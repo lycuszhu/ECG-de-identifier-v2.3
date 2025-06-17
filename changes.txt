@@ -1,0 +1,8 @@
+Changes log:
+added progressbar for ecg
+fixed minor bugs
+resolved folder creation
+changed the length of random id generated from 4 to eight digits
+resolved the csv download problem for mappings
+name changing was changed to blank spaces
+date of birth and age was reserved

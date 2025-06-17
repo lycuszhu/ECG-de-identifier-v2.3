@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='logo_1.png') }}" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECG De-Identifier</title>
+    <style>
+        body {
+            background-image: url('/static/index_bg.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #7c7c7c8e;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #ffffffec;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            height: 50px; /* Adjust as needed */
+            margin-right: 10px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            color: #333;
+        }
+
+        .home-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #42608d;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .home-button:hover {
+            background-color: #072e47;
+        }
+
+        .container h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #777;
+        }
+
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .form-group button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1a296d;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-group button:hover {
+            background-color: #020c49;
+        }
+
+        #download_link {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #download_link a {
+            padding: 12px 20px;
+            background-color: #008CBA;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #download_link a:hover {
+            background-color: #007B9E;
+        }
+
+        .file-count {
+            font-size: 14px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .progress-group {
+            display: none;
+            margin-top: 20px;
+        }
+
+        progress {
+            width: 100%;
+            height: 20px;
+        }
+
+        .progress-percent {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="home-button">Home</a>
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo_1.png') }}" alt="Logo">
+            <h1>ECG De-Identifier</h1>
+        </div>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Files:</label>
+                <input type="file" id="file" name="file" webkitdirectory directory multiple onchange="updateFileCount()">
+                <div class="file-count" id="fileCount">Total ECG files: 0</div>
+            </div>
+            <div class="form-group">
+                <button type="submit">Upload</button>
+            </div>
+        </form>
+        
+        <!-- Progress Bar Section -->
+        <div class="progress-group" id="progressContainer">
+            <label>Processing progress:</label>
+            <progress id="progressBar" value="0" max="100"></progress>
+            <div class="progress-percent" id="progressPercent">0%</div>
+        </div>
+        
+        <!-- Download Link -->
+        <div id="download_link">
+            <a id="download_button" href="#">Download Processed Files</a>
+        </div>
+    </div>
+
+    <script>
+        function updateFileCount() {
+            const input = document.getElementById('file');
+            const fileCount = document.getElementById('fileCount');
+            let txtFileCount = 0;
+    
+            if (input.files) {
+                for (let i = 0; i < input.files.length; i++) {
+                    const file = input.files[i];
+                    if (file.name.toLowerCase().endsWith('.txt') || file.name.toLowerCase().endsWith('.xml')) {
+                        txtFileCount++;
+                    }
+                }
+                fileCount.textContent = `Total ECG files: ${txtFileCount}`;
+            } else {
+                fileCount.textContent = 'Total ECG files: 0';
+            }
+        }
+    
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const xhr = new XMLHttpRequest();
+    
+            xhr.open('POST', '/upload', true);
+    
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    startProgressTracking();
+                } else {
+                    alert('Upload failed. Please try again.');
+                }
+            };
+            xhr.send(formData);
+        });
+    
+        function startProgressTracking() {
+            document.getElementById('progressContainer').style.display = 'block';
+            const source = new EventSource('/process_files');
+    
+            source.onmessage = function (event) {
+                const data = event.data;
+    
+                if (!isNaN(data)) {
+                    const progress = parseFloat(data);
+                    document.getElementById('progressBar').value = progress;
+                    document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+    
+                    if (progress >= 100) {
+                        // Optionally hide the progress bar or keep it as is
+                    }
+                } else if (data.startsWith('complete')) {
+                    const downloadButton = document.getElementById('download_button');
+                    const filename = data.split(':')[1];
+                    downloadButton.href = '/download_file/' + filename;
+                    document.getElementById('download_link').style.display = 'block';
+                    
+                    // **Close the EventSource connection to prevent reconnection**
+                    source.close();
+                    console.log('EventSource connection closed.');
+                }
+            };
+    
+            source.onerror = function () {
+                console.error('EventSource failed.');
+                // Optionally handle errors and close the connection
+                source.close();
+            };
+        }
+    </script>
+    
+</body>
+</html>

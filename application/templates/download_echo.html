@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='logo_1.png') }}" type="image/x-icon"> <!-- Favicon link -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Echo Files</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7c7c7c8e;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background-image: url('/static/index_bg.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .container h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .container p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            max-width: 50px;
+            height: auto;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+
+        .header h2 {
+            color: #333;
+            margin: 0;
+        }
+
+        .container p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .download-button {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #4b2296;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .download-button:hover {
+            background-color: #1b104d;
+        }
+
+                /* Home Button styles */
+                .home-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+
+        .home-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="home-button">Home</a> <!-- Home button added here -->
+
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo_1.png') }}" alt="Logo"> <!-- Rescaled logo -->
+            <h2>Echocardiograms Processed Successfully</h2>
+        </div>
+        <p>Click the button below to download the zipped file</p>
+        <a href="{{ url_for('download_echo_file', filename=zip_filename) }}" class="download-button">
+            Download
+        </a>
+    </div>
+</body>
+</html>
